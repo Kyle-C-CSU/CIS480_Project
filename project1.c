@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 void upper(char *inst){     //passed by reference so should update without having to return
     //upper cases all char value in instruction
@@ -30,15 +31,20 @@ int *decimalToBinary_n(int dec, int *binMSB, int n){
     return binMSB;
 }
 
+
+
 int main(int argc, char *argv[]) {
-/*create pointer to read file*/
-   FILE *fp;
-   char str[60];
+
+   FILE *fp; //pointer for read file 
+   char str[60],label[20], instruction[20], operand[20]; //buffer vals 
+   bool data_sec; 
+   int bitcount, data[512], text[512]; //binary buffer vals 
+
    /* opening file for reading */
     fp = fopen(argv[1] , "r");
     if(fp == NULL) {
-      perror("Error opening file");
-    return(-1);
+        perror("Error opening file");
+        return(-1);
     }
 
     /*create file to write to new (bin)file*/
@@ -50,22 +56,30 @@ int main(int argc, char *argv[]) {
         /* print content to stdout */
         puts(str);
 
-    /*.data section first 512 bits*/
+    
         if (strcmp(str, ".data")==0){
-            int data[512], bit_count;
-            bit_count = 0;
-            char label[20], instruction[20], operand[20];
-            sscanf( str, "%s %s %s ", label, instruction, operand );
+            data_sec = true;
+            bitcount = 0;
+
+        }
+        if(strcmp(str, ".text")==0){
+            data_sec = false;
+            bitcount = 0;
+        }
+        
+        
+        if(data_sec){
+        /*.data section first 512 bits*/
+            sscanf( str, "%s %s %s", label, instruction, operand );
             //read all data section into string
             //parse into op, rs, rt, rd, shamt, func
             //convert into binary
             //append all remaing bits to 0
-
-
         }
-    /*.text section last 512 bits*/
-        else if(strcmp(str, ".text")==0){
-            int text[(512)];
+
+        else{
+        /*.text section last 512 bits*/
+            sscanf( str, "%s\t%s\t%s\n", label, instruction, operand );
             //read all text section into string
             //parse into op, rs, rt, rd, shamt, func
             //op
@@ -74,15 +88,11 @@ int main(int argc, char *argv[]) {
             //append all remaing bits to 0
         }
         /*scan data into place holders for bin data to be converted*/
-        else{
-            char label[20], instruction[20], operand[20];
-            sscanf( str, "%s %s %s ", label, instruction, operand );
-            //printf("%s\t%s\t%s\n", label, instruction, operand);
+       
+        /*write binary to new file(binfile)*/
+        if (fwrite(str,sizeof(str), 1, fpnew )!=1) {
+            perror("Error writing file"); return(-1);
         }
-            /*write binary to new file(binfile)*/
-            if (fwrite(str,sizeof(str), 1, fpnew )!=1) {
-                perror("Error writing file"); return(-1);
-            }
         
     }
 
