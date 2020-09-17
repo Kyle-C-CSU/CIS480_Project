@@ -33,7 +33,7 @@ int *decimalToBinary_n(int dec, int *binMSB, int n){
 
 //push values from a to b 
 int *arrypush(int *a, int *b, int offset, int n ){
-    for(int i=offset;i<5;i++){
+    for(int i=offset;i<n;i++){
         b[i] = a[i];
     }
     return b;
@@ -56,6 +56,14 @@ int ins_conv(char *ins){
     return index;
 }
 
+void print_array(int a[], int n){
+    for (int i = 0; i < n; ++i)
+    {
+        printf("%d\t",a[i] );
+        if (i == n-1) printf("\n");
+    }
+}
+
 
 
 int main(int argc, char *argv[]) {
@@ -68,7 +76,7 @@ int main(int argc, char *argv[]) {
     *2. find solution to reference labels (symbol table)
     *3. fix arraypush method: not storing correct values by reference
     *4. finish .data condition   
-    *5. Finish formating strings for each instruction case
+    *5.*done* Finish formating strings for each instruction case                                  *done*
     *6. implement LA instruction 
     *7. Create 1024 array to store data + txt feilds and find a solution to concatinate
     */
@@ -87,12 +95,15 @@ int main(int argc, char *argv[]) {
     FILE *fp; //pointer for read file 
     char str[60],lab[20], ins[20], op[20]; //buffer vals 
     bool data_sec; 
-    int bitcount, opcode,rd,rs,rt,imm, data[512], text[512]; //binary buffer vals 
+    int bitcount, opcode,rd,rs,rt,imm, reg16[16], data[512], text[512]; //binary buffer vals 
 
 
     
     int reg6[] = {0,0,0,0,0,0};
     int reg5[] = {0,0,0,0,0,0};
+
+    for (int i = 0; i < 16; ++i)
+        reg16[i]= 0;
     for(int i = 0; i < 512; i++)
         data[i]=0;
 
@@ -153,6 +164,44 @@ int main(int argc, char *argv[]) {
                     decimalToBinary_n(opcode, reg6, 6);
                     arrypush(reg6,data,bitcount,6);
                     bitcount+=6;
+                    printf("reg6 of opcode contains: \n");
+                    print_array(reg6,6);
+                    decimalToBinary_n(rs, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    printf("reg5 of rs contains: \n");
+                    print_array(reg5,5);
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    printf("reg5 of rt contains: \n");
+                    print_array(reg5,5);
+                    decimalToBinary_n(rd, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    printf("reg5 of rd contains: \n");
+                    print_array(reg5,5);
+                    decimalToBinary_n(0,reg5,5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    printf("reg5 of shamt contains: \n");
+                    print_array(reg5,5);
+                    decimalToBinary_n(32, reg6, 6);
+                    arrypush(reg6, data,bitcount,6);
+                    bitcount+=6; 
+                    printf("reg6 of func contains: \n");
+                    print_array(reg5,5);
+                    printf("data contains: \n");
+                    print_array(data, 32);
+                    
+                    break;
+                    
+                case 2: //sub
+                    sscanf( op, "$%d,$%d,$%d", &rd, &rs, &rt );
+                    opcode = 0;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
                     decimalToBinary_n(rs, reg5, 5);
                     arrypush(reg5,data,bitcount,5);
                     bitcount+=5;
@@ -165,47 +214,161 @@ int main(int argc, char *argv[]) {
                     decimalToBinary_n(0,reg5,5);
                     arrypush(reg5,data,bitcount,5);
                     bitcount+=5;
-                    decimalToBinary_n(32, reg6, 6);
+                    decimalToBinary_n(34, reg6, 6);
                     arrypush(reg6, data,bitcount,6);
-                    bitcount+=6; 
-                    break;
-                    
-                case 2: //sub
-                    sscanf( op, "$%d,$%d,$%d", &rd, &rs, &rt );
-                    opcode = 0;
+                    bitcount+=6;
                     break;
                 case 3: //sll
                     sscanf( op, "$%d,$%d,%d", &rd, &rs, &rt );
                     opcode = 0;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
+                    decimalToBinary_n(0, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rd, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rs,reg5,5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(0, reg6, 6);
+                    arrypush(reg6, data,bitcount,6);
+                    bitcount+=6;
                     break;
                 case 4: //srl
                     sscanf( op, "$%d,$%d,%d", &rd, &rs, &rt );
                     opcode = 0;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
+                    decimalToBinary_n(0, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rd, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rs,reg5,5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(2, reg6, 6);
+                    arrypush(reg6, data,bitcount,6);
+                    bitcount+=6;
                     break;
                 case 5: //slt
                     sscanf( op, "$%d,$%d,$%d", &rd, &rs, &rt );
                     opcode = 0;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
+                    decimalToBinary_n(rs, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rd, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(0,reg5,5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(42, reg6, 6);
+                    arrypush(reg6, data,bitcount,6);
+                    bitcount+=6;
                     break;
-                case 6: //addi
-                    sscanf( op, "$%d,$%d,%d", &rd, &rs, &rt );
+                
+                /*need to figure out how to reference labels for imm*/
+
+                case 6: //addi 
+                    sscanf( op, "$%d,$%d,%d", &rt, &rs, &imm );
                     opcode = 8;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
+                    decimalToBinary_n(rs, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(imm, reg16, 16);
+                    arrypush(reg16,data,bitcount,16);
+                    bitcount+=16;
                     break;
                 case 7: //lui
-                    sscanf( op, "$%d,%s", &rd, lab);
+                    sscanf( op, "$%d,%s", &rt, &imm);
                     opcode = 15;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
+                    decimalToBinary_n(0, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(imm, reg16, 16);
+                    arrypush(reg16,data,bitcount,16);
+                    bitcount+=16;
                     break;
                 case 8: //ori
-                    sscanf( op, "$%d,$%d,%s", &rd,&rs,lab);
+                    sscanf( op, "$%d,$%d,%s", &rt,&rs,&imm);
                     opcode = 13;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
+                    decimalToBinary_n(rs, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(imm, reg16, 16);
+                    arrypush(reg16,data,bitcount,16);
+                    bitcount+=16;
                     break;
                 case 9: //lw
-                    sscanf( op, "$%d,%d($%d)", &rd, &imm, &rs);
+                    sscanf( op, "$%d,%d($%d)", &rt, &imm, &rs);
                     opcode = 35;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
+                    decimalToBinary_n(rs, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(imm, reg16, 16);
+                    arrypush(reg16,data,bitcount,16);
+                    bitcount+=16;
                     break;
                 case 10: //sw
                     sscanf( op, "$%d,%d($%d)", &rd, &imm, &rs);
                     opcode = 43;
+                    decimalToBinary_n(opcode, reg6, 6);
+                    arrypush(reg6,data,bitcount,6);
+                    bitcount+=6;
+                    decimalToBinary_n(rs, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(rt, reg5, 5);
+                    arrypush(reg5,data,bitcount,5);
+                    bitcount+=5;
+                    decimalToBinary_n(imm, reg16, 16);
+                    arrypush(reg16,data,bitcount,16);
+                    bitcount+=16;
                     break;
+
+                    //need case for LA
                      
                 default:
                     printf("Error: value passed not between 1-10\n");
