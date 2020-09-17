@@ -350,12 +350,6 @@ int main(int argc, char *argv[]) {
                 default:
                     printf("Error: value passed not between 1-10\n");
             }
-            //read all text section into string
-            //parse into op, rs, rt, rd, shamt, func
-            //op
-
-            //convert into binary
-            //append all remaing bits to 0
         }
             
         /*scan data into place holders for bin data to be converted*/
