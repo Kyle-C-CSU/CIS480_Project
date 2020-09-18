@@ -33,7 +33,7 @@ int *decimalToBinary_n(int dec, int *binMSB, int n){
 
 //push values from a to b 
 int *arrypush(int *a, int *b, int offset, int n ){
-    for(int i=offset;i<5;i++){
+    for(int i=offset;i<n;i++){
         b[i] = a[i];
     }
     return b;
@@ -54,6 +54,14 @@ int ins_conv(char *ins){
     }
     
     return index;
+}
+
+void print_array(int a[], int n){
+    for (int i = 0; i < n; ++i)
+    {
+        printf("%d\t",a[i] );
+        if (i == n-1) printf("\n");
+    }
 }
 
 
@@ -85,11 +93,11 @@ int main(int argc, char *argv[]) {
 
 
     FILE *fp; //pointer for read file 
-    char str[60],lab[20], ins[20], op[20]; //buffer vals 
+    char str[60],lab[20], dir[20],ins[20], op[20]; //buffer vals 
     bool data_sec; 
     int bitcount, opcode,rd,rs,rt,imm, reg16[16], data[512], text[512]; //binary buffer vals 
 
-
+    printf("%s\n",argv[1]);
     
     int reg6[] = {0,0,0,0,0,0};
     int reg5[] = {0,0,0,0,0,0};
@@ -121,7 +129,9 @@ int main(int argc, char *argv[]) {
             str[len-1] = 0;
         puts(str);
 
-        
+        char* pPosition = strchr(str, ':');
+        printf("%s\n",pPosition);
+        printf("%s\n",str);
         if (strcmp(str, "\t.data")==0){
             data_sec = true;
             bitcount = 0;
@@ -130,25 +140,40 @@ int main(int argc, char *argv[]) {
         if(strcmp(str, "\t.text")==0){
             data_sec = false;
             bitcount = 0;
+
         }
-        
-        
+            
         if(data_sec){
         /*.data section first 512 bits*/
-            sscanf( str, "%s %s %s", lab, ins, op );
+            
+            if(pPosition){//check for label 
+                sscanf( str, "%s: %s %s", lab, dir, op );
+            }
+            sscanf( str, "%s %s",dir, op );
         }
 
         else{
         /*.text section last 512 bits*/
-            sscanf( str, "%s %s %s", lab, ins, op );
-            //check for label error handeling temporary
-            int input;
-            if(strlen(ins)<3)
-                input = -1;
+            if(pPosition){//check for label 
+                printf("entered label check in .text\n");
+                sscanf( str, "%s: %s %s", lab, ins, op );
+                printf("%s\n",str);
+                printf("%s\t%s\t%s\n",lab,ins,op);
+            }
             else
-                input = ins_conv(ins);
-                
+                sscanf( str, "%s %s",ins, op );
             
+            int input = 0;
+            if (str[0] == '\t') //check if str is directives 
+                input = 12;    
+            else{
+                printf("%s\n",ins );
+                upper(ins);
+                printf("%s\n",ins);
+                input = ins_conv(ins);
+            } 
+            printf("%d\n",input);
+
             switch(input){
                 case 1: //add
                     sscanf( op, "$%d,$%d,$%d", &rd, &rs, &rt );
@@ -156,21 +181,36 @@ int main(int argc, char *argv[]) {
                     decimalToBinary_n(opcode, reg6, 6);
                     arrypush(reg6,data,bitcount,6);
                     bitcount+=6;
+                    printf("reg6 of opcode contains: \n");
+                    print_array(reg6,6);
                     decimalToBinary_n(rs, reg5, 5);
                     arrypush(reg5,data,bitcount,5);
                     bitcount+=5;
+                    printf("reg5 of rs contains: \n");
+                    print_array(reg5,5);
                     decimalToBinary_n(rt, reg5, 5);
                     arrypush(reg5,data,bitcount,5);
                     bitcount+=5;
+                    printf("reg5 of rt contains: \n");
+                    print_array(reg5,5);
                     decimalToBinary_n(rd, reg5, 5);
                     arrypush(reg5,data,bitcount,5);
                     bitcount+=5;
+                    printf("reg5 of rd contains: \n");
+                    print_array(reg5,5);
                     decimalToBinary_n(0,reg5,5);
                     arrypush(reg5,data,bitcount,5);
                     bitcount+=5;
+                    printf("reg5 of shamt contains: \n");
+                    print_array(reg5,5);
                     decimalToBinary_n(32, reg6, 6);
                     arrypush(reg6, data,bitcount,6);
                     bitcount+=6; 
+                    printf("reg6 of func contains: \n");
+                    print_array(reg5,5);
+                    printf("data contains: \n");
+                    print_array(data, 32);
+                    
                     break;
                     
                 case 2: //sub
@@ -345,11 +385,21 @@ int main(int argc, char *argv[]) {
                     bitcount+=16;
                     break;
 
+                case 12:
+                    //directive do nothing
+                    break; 
+
                     //need case for LA
                      
                 default:
                     printf("Error: value passed not between 1-10\n");
             }
+            //read all text section into string
+            //parse into op, rs, rt, rd, shamt, func
+            //op
+
+            //convert into binary
+            //append all remaing bits to 0
         }
             
         /*scan data into place holders for bin data to be converted*/
