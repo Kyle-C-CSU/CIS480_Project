@@ -496,15 +496,8 @@ int main(int argc, char *argv[]) {
                         perror("Error writing file"); return(-1);
                     }
                     break;
-                    
-                    
-                    
 
-                case 12:
-                    //directive do nothing for tab
-                    break;
-
-                case 13: //BEQ
+                case 12: //BEQ
                     sscanf( op, "$%d,$%d,%s", &rs,&rt,lower);
                     for(int i=0;i<lab_count;i++){
                         if(strcmp(lab_name[i],lower)==0)
@@ -527,7 +520,7 @@ int main(int argc, char *argv[]) {
                     // if rs == rt jumps to label
                     // else rs != rt nothing happens
 
-                case 14: //BNE
+                case 13: //BNE
                     sscanf( op, "$%d,$%d,%s", &rs,&rt,lower);
                     for(int i=0;i<lab_count;i++){
                         if(strcmp(lab_name[i],lower)==0)
@@ -549,7 +542,25 @@ int main(int argc, char *argv[]) {
                     //comparing rs, rt
                     // if rs != rt jumps to label
                     // else rs == rt nothing happens
-
+                    
+                case 14: //j
+                    sscanf( op, " %s", lower);
+                    for(int i=0;i<lab_count;i++){
+                        if(strcmp(lab_name[i],lower)==0)
+                            imm = lab_add[i];
+                    }
+                    opcode = 2;
+                    strcpy(str33,binconv(opcode,6));
+                    text_bits+=6;
+                    strcat(str33,binconv(imm,26));
+                    text_bits+=26;
+                    if (fwrite(str33,sizeof(str33), 1, fpnew )!=1) {
+                        perror("Error writing file"); return(-1);
+                    }
+                
+                case 15:
+                    //directive do nothing for tab
+                    break;
                      
                 default:
                     printf("Error: value passed not between 1-10\n");
