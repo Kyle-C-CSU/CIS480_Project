@@ -6,38 +6,64 @@
 #include <math.h>
 #define numofstrings 100
 
-char **lab_name;
+char **lab_name, **lab_val;
 int *lab_add;
 
-int pc_addr_data(dir,op,pc_addr){
+char *upper(char *inst){     //passed by reference so should update without having to return
+    //upper cases all char value in instruction
+    while(*inst){
+        *inst = toupper((unsigned char) *inst);
+        inst++;
+    }
+    return inst;
+}
+
+int pc_addr_data(char *dir,char *op,int pc_addr){
     int op_count=0;
-    char *tok = strtok(op, ",")
+    char cpy[20];
+    strcpy(cpy,op);
+    char *tok = strtok(cpy, ",");
+    
     while(tok != NULL){
         tok = strtok(NULL,",");
         op_count++;
     }
     if(!strcmp(dir,".word"))
-        pc_addr = op_count*32;
+        pc_addr += op_count*32;
     else //.space
-        pc_addr = op*8
+        pc_addr += atoi(op)*8;
     return pc_addr;
                 
 }
 
-int pc_addr_text(ins,pc_addr){
-    if(!strcmp(upper(ins),"LA")
-        pc_addr += 2*32;
+int pc_addr_text(char *ins,int pc_addr){
+    if(!strcmp(upper(ins),"LA"))
+        pc_addr += (2*32);
     else
         pc_addr += 32;
     return pc_addr;
     
 }
 
-void lab_name_addr(lab,pc_addr){
-    lab[strlen(lab)-1]='\0';
+void lab_name_addr(char *lab,int pc_addr,int lab_count){
+    //lab[strlen(lab)-1]='\0';
     lab_name[lab_count] = (char*)malloc(sizeof(char*) * strlen(lab));
     strcpy(lab_name[lab_count],lab);
     lab_add[lab_count] = pc_addr;
+}
+
+void lab_val_tok(char *op){
+    char cpy[20];
+    strcpy(cpy,op);
+    char *tok = strtok(op,",");
+    *(lab_val+0) = tok;
+    int ops = 1;
+    while(tok != NULL){
+        tok = strtok(NULL, ",");
+        *(lab_val+ops) = tok;
+        if (tok != NULL)
+            ops++;
+    }
 }
 
 
@@ -80,7 +106,7 @@ int main(int argc, char *argv[]) {
     int pc_addr = 0;
    
     
-    char **lab_val, **ins_lines;
+    char  **ins_lines;
     int *ins_line_addr = malloc(numofstrings*sizeof(int*));
     lab_name = malloc(numofstrings*sizeof(char*));
     lab_add = malloc(numofstrings*sizeof(int*));
@@ -116,6 +142,7 @@ int main(int argc, char *argv[]) {
         strcpy(ins_lines[lines],str33);
         
         //check conditions for text and data
+        
         char* pPosition = strchr(str33, ':');
         if(!strcmp(str33,".data")){
             data_sec = true;
@@ -127,12 +154,23 @@ int main(int argc, char *argv[]) {
             pc_addr = 512;
             continue;
         }
+        //associate ins_lines with proper pc_address 
+        ins_line_addr[lines] = pc_addr;
 
         if(data_sec){
             //labels in .data
             if(pPosition){
                 sscanf( str33, "%s %s %s", lab, dir, op );
+                //assign label name and addres to symbol table
+                lab_name_addr(lab, pc_addr, lab_count);
+                //evaluate pc_addr
                 pc_addr = pc_addr_data(dir,op,pc_addr);
+                lab_count++;
+                //assign label values to symbol table
+                /*lab_val_tok(op);
+                //increment labels 
+                lab_count++;
+                */
             
             }
             else{ //no labels in .data
@@ -143,8 +181,13 @@ int main(int argc, char *argv[]) {
         }
         else{ //text section
             if(pPosition){ //labels in text
-                sscanf(str33, "%s %s, %s"lab,ins,op);
+                sscanf(str33, "%s %s %s",lab,ins,op);
+                //assign label address and name to symbol table 
+                lab_name_addr(lab,pc_addr,lab_count);
+                //evaluate pc addr
                 pc_addr = pc_addr_text(ins,pc_addr);
+                //count the labels
+                lab_count++;
             }
             else{ //no labels in text
                 sscanf(str33, "%s %s",ins,op);
@@ -154,50 +197,26 @@ int main(int argc, char *argv[]) {
 
         }
 
-        //associate ins_lines with address 
-        ins_lines_addr[lines] = pc_addr;
-
-        //assigning label symbol table
-        if(pPosition){//check for label
-            if(data_sec){
-                sscanf( str33, "%s %s %s", lab, dir, op );
-                lab[strlen(lab)-1]='\0';
-
-                lab_name[lab_count] = (char*)malloc(sizeof(char*) * strlen(lab));
-                strcpy(lab_name[lab_count],lab);
-                lab_add[lab_count] = pc_addr;
-                char *tok = strtok(op,",");
-                *(lab_val+0) = tok;
-                int ops = 1;
-                while(tok != NULL){
-                    tok = strtok(NULL, ",");
-                    *(lab_val+ops) = tok;
-                if (tok != NULL)
-                    ops++;
-                }
-                lab_count++;
-                
-            }
-            else{ //text section
-                sscanf( str33, "%s %s %s", lab, ins, op);
-                lab[strlen(lab)-1]='\0';
-
-                lab_name[lab_count] = (char*)malloc(sizeof(char*) * strlen(lab));
-                strcpy(lab_name[lab_count],lab);
-                lab_add[lab_count] = pc_addr;
-                lab_count++;
-
-
-
-            }
-        }
+       
+        //increment lines in file
         lines++;
         
 
     }
 
-    printf("\nend\n");
-        for(int i=0;i<lines;i++)
-            printf("lines[%d]%s\n",i,ins_lines[i]);
+    
+        for(int i=0;i<lines;i++){
+            printf("%d\t",ins_line_addr[i]);
+            printf("%s\t",ins_lines[i]);
+            printf("\n");
+        }
+        printf("\n");
+        for(int i=0;i<lab_count;i++){
+            printf("%s\t",lab_name[i]);
+            printf("%d\t",lab_add[i]);
+            printf("\n");
+        }
+
+            
     return 0;
 }
